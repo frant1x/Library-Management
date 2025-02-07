@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Authors{% endblock %}
+
+{% block content%}
+<div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="createModalLabel">Create author</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{% url 'author:create_author' %}" id="createForm" method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="" class="col-form-label">Name:</label>
+                        {{ form.name }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="surname" class="col-form-label">Surname:</label>
+                        {{ form.surname }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="patronymic" class="col-form-label">Patronymic:</label>
+                        {{ form.patronymic }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="patronymic" class="col-form-label">Books:</label>
+                        {{ form.books }}
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Close
+                </button>
+                <button type="submit" class="btn btn-primary" form="createForm">
+                    Create
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<section class="py-3 text-center container">
+    <div class="row py-lg-5">
+        <div class="col-lg-6 col-md-8 mx-auto">
+            <h1 class="fw-light">All Authors</h1>
+            <p class="lead text-muted">Information about all authors.</p>
+            <p>
+                {% if request.user.is_superuser %}
+                <button type="button" class="btn btn-primary my-2" data-bs-toggle="modal" data-bs-target="#createModal">
+                    Create
+                </button>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+</section>
+<div class="container my-3">
+    {% if authors %}
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+        {% for author in authors %}
+        <div class="col">
+            <div class="card shadow-sm" style="text-anchor: middle">
+                <svg class="bd-placeholder-img card-img-top" width="100%" height="225"
+                    xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
+                    preserveAspectRatio="xMidYMid slice" focusable="false">
+                    <rect width="100%" height="100%" fill="#55595c"></rect>
+                    <text x="50%" y="50%" fill="#eceeef" dy=".3em">
+                        {{ author.name }} {{ author.surname }}
+                    </text>
+                </svg>
+                <div class="card-body">
+                    <p class="card-text"
+                        style="overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;">
+                        Books:
+                        {% for book in author.books.all %}
+                        {{ book.name }} |
+                        {% endfor %}
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        {% if request.user.is_superuser %}
+                        <div class="btn-group">
+                            <a href="{% url 'author:delete_author' author.id %}"
+                                class="btn btn-sm btn-outline-secondary">Delete</a>
+                            <a href="{% url 'author:edit_author' author.id %}"
+                                class="btn btn-sm btn-outline-secondary">Edit</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
+{% endblock %}

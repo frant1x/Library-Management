@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Books{% endblock %}
+
+{% block content%}
+<div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="filterModalLabel">Book filter</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form action="{% url 'book:filter_books' %}" id="filterForm" method="post">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="title" class="col-form-label">Title:</label>
+            <input type="text" class="form-control" id="title" name="title" />
+          </div>
+          <div class="mb-3">
+            <label for="author" class="col-form-label">Author:</label>
+            <input type="text" class="form-control" id="author" name="author" />
+          </div>
+          <div class="col-sm-9 mb-3">
+            Count of the book:
+            <div class="row">
+              <div class="col-6 col-sm-6">
+                <label for="count_min" class="col-form-label">Min:</label>
+                <input type="number" class="form-control" id="count_min" name="count_min" step="1" />
+              </div>
+              <div class="col-6 col-sm-6">
+                <label for="count_max" class="col-form-label">Max:</label>
+                <input type="number" class="form-control" id="count_max" name="count_max" step="1" />
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Close
+        </button>
+        <button type="submit" class="btn btn-primary" form="filterForm">
+          Apply filter
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<section class="py-3 text-center container">
+  <div class="row py-lg-5">
+    <div class="col-lg-6 col-md-8 mx-auto">
+      {% if user_name %}
+      <h1 class="fw-light">{{ user_name }}'s Books</h1>
+      {% else %}
+      <h1 class="fw-light">All Books</h1>
+      {% endif %}
+      <p class="lead text-muted">Information about all books.</p>
+      <p>
+        <button type="button" class="btn btn-primary my-2" data-bs-toggle="modal" data-bs-target="#filterModal">
+          Filter
+        </button>
+        {% if filter %}
+        <a href="{% url 'book:all_books' %}" class="btn btn-secondary my-2">Reset</a>
+        {% endif %}
+      </p>
+    </div>
+  </div>
+</section>
+<div class="container my-3">
+  {% if books %}
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+    {% for book in books %}
+    <div class="col">
+      <div class="card shadow-sm" style="text-anchor: middle">
+        <svg class="bd-placeholder-img card-img-top" width="100%" height="225" xmlns="http://www.w3.org/2000/svg"
+          role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false">
+          <rect width="100%" height="100%" fill="#55595c"></rect>
+          <text x="50%" y="50%" fill="#eceeef" dy=".3em">{{ book.name }}</text>
+        </svg>
+        <div class="card-body">
+          <p class="card-text"> Authors:
+            {% for author in book.authors.all %}
+            {{ author.name }} {{ author.surname }}
+            {% endfor %}
+          </p>
+          <p class="card-text"
+            style="overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;">
+            Description: {{ book.description }}
+          </p>
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="btn-group">
+              <a href="{% url 'book:specific_book' book.id %}" class="btn btn-sm btn-outline-secondary">View</a>
+            </div>
+            <small class="text-muted">{{ book.count }} left</small>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+  integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+{% endblock %}

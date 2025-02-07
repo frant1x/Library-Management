@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}User{% endblock %}
+
+{% block content%}
+<div class="container" style="margin-top: 2rem; margin-bottom: 2rem">
+  <div class="row g-5">
+    <div class="col-md-7 col-lg-8">
+      <h4 class="mb-3">User information</h4>
+      <form method="post">
+        {% csrf_token %}
+        <div class="row g-3">
+          <div class="col-sm-4">
+            <label for="" class="form-label">First name</label>
+            {{ form.first_name }}
+          </div>
+          <div class="col-sm-4">
+            <label for="" class="form-label">Middle name</label>
+            {{ form.middle_name }}
+          </div>
+          <div class="col-sm-4">
+            <label for="" class="form-label">Last name</label>
+            {{ form.last_name }}
+          </div>
+
+          <div class="col-12">
+            <label for="" class="form-label">Email</label>
+            {{ form.email }}
+          </div>
+
+          <div class="col-12">
+            <label for="" class="form-label">Password</label>
+            {{ form.password }}
+          </div>
+
+          <div class="col-sm-4">
+            <label for="" class="form-label">Last login</label>
+            {{ form.last_login }}
+          </div>
+          <div class="col-sm-4">
+            <label for="" class="form-label">Created at</label>
+            {{ form.created_at }}
+          </div>
+          <div class="col-sm-4">
+            <label for="" class="form-label">Updated at</label>
+            {{ form.updated_at }}
+          </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <h4 class="mb-3">Role</h4>
+
+        <div class="my-3">
+          {{ form.role }}
+        </div>
+        <hr class="my-4" />
+        <div class="form-check">
+          {{ form.is_active }}
+          <label for="">Active</label>
+        </div>
+        <div class="form-check">
+          {{ form.is_superuser }}
+          <label for="">Superuser</label>
+        </div>
+        <div class="form-check">
+          {{ form.is_staff }}
+          <label for="">Staff</label>
+        </div>
+
+        <hr class="my-4" />
+
+        <button type="submit" class="w-100 btn btn-primary btn-lg">Update user</button>
+        <hr class="my-2" />
+        <a href="{% url 'authentication:user_books' user.id %}" class="w-100 btn btn-primary btn-lg">Show books</a>
+        <hr class="my-2" />
+        <a href="{% url 'authentication:user_orders' user.id %}" class="w-100 btn btn-primary btn-lg">Show orders</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

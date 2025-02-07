@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="container px-4 py-5" id="featured-4">
+    <div class="row g-4 py-5 row-cols-1 row-cols-lg-4">
+        <div class="feature col">
+            <h3 class="fs-2 text-body-emphasis">Books</h3>
+            <ul class="list-group-flush">
+                <li class="list-group-item">• Information about all books</li>
+                <li class="list-group-item">• Opportunity to view a specific book</li>
+                <li class="list-group-item">
+                    • Ability to filter books by various criteria
+                </li>
+            </ul>
+            <a href="{% url 'book:all_books' %}" class="icon-link"> All books </a>
+        </div>
+        <div class="feature col">
+            <h3 class="fs-2 text-body-emphasis">Users</h3>
+            <ul class="list-group-flush">
+                <li class="list-group-item">• Information about all users</li>
+                <li class="list-group-item">• Opportunity to view a specific user</li>
+                <li class="list-group-item" style="visibility: hidden">•</li>
+                <li class="list-group-item" style="visibility: hidden">•</li>
+            </ul>
+            <a href="{% url 'authentication:show_users' %}" class="icon-link">
+                All users
+            </a>
+        </div>
+        <div class="feature col">
+            <h3 class="fs-2 text-body-emphasis">Orders</h3>
+            <ul class="list-group-flush">
+                <li class="list-group-item">• Information about all orders</li>
+                <li class="list-group-item">• Information about all user's orders</li>
+                <li class="list-group-item">• Opportunity to create an order</li>
+                <li class="list-group-item">• Opportunity to close the order</li>
+            </ul>
+            <a href="{% url 'order:all_orders' %}" class="icon-link"> All orders </a>
+        </div>
+        <div class="feature col">
+            <h3 class="fs-2 text-body-emphasis">Authors</h3>
+            <ul class="list-group-flush">
+                <li class="list-group-item">• Information about all authors</li>
+                <li class="list-group-item">• Opportunity to create a new author</li>
+                <li class="list-group-item">
+                    • Ability to remove the author if he is not attached to any book
+                </li>
+            </ul>
+            <a href="{% url 'author:all_authors' %}" class="icon-link"> All authors </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
