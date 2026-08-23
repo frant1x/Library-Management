@@ -53,23 +53,23 @@ def filter_books(request):
 
 
 def add_book(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         form = BookForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('add_book')
+            return redirect("add_book")
     else:
         form = BookForm()
-    return render(request, 'book/add_book.html', {'form': form})
+    return render(request, "book/add_book.html", {"form": form})
 
 
 def edit_book(request, pk):
     book = get_object_or_404(Book, pk=pk)
-    if request.method == 'POST':
+    if request.method == "POST":
         form = BookForm(request.POST, instance=book)
         if form.is_valid():
             form.save()
-            return redirect('edit_book')
+            return redirect("edit_book")
     else:
         form = BookForm(instance=book)
-    return render(request, 'book/edit_book.html', {'form': form})
+    return render(request, "book/edit_book.html", {"form": form})

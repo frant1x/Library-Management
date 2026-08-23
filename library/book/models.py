@@ -1,5 +1,5 @@
 from django.db import models
-from authentication.models import CustomUser
+from authentication.models import User
 
 
 class Book(models.Model):
@@ -20,7 +20,7 @@ class Book(models.Model):
     name = models.CharField(blank=True, max_length=128)
     description = models.CharField(blank=True, max_length=256)
     count = models.IntegerField(default=10)
-    users = models.ManyToManyField(CustomUser, null=True, related_name="books")
+    users = models.ManyToManyField(User, null=True, related_name="books")
     id = models.AutoField(primary_key=True)
 
     def __str__(self):

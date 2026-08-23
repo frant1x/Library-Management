@@ -2,14 +2,11 @@ from django.forms import ModelForm
 
 from django import forms
 
-from .models import CustomUser
+from .models import User
 
 CUSTOM_WIDGETS = {
     "first_name": forms.TextInput(
         attrs={"class": "form-control", "placeholder": "First name"}
-    ),
-    "middle_name": forms.TextInput(
-        attrs={"class": "form-control", "placeholder": "Middle name"}
     ),
     "last_name": forms.TextInput(
         attrs={"class": "form-control", "placeholder": "Last name"}
@@ -43,14 +40,13 @@ CUSTOM_WIDGETS = {
 class RegistrationForm(ModelForm):
 
     class Meta:
-        model = CustomUser
-        fields = ["first_name", "middle_name", "last_name", "email", "password", "role"]
+        model = User
+        fields = ["first_name", "last_name", "email", "password", "role"]
         widgets = {key: CUSTOM_WIDGETS[key] for key in fields}
 
     def __init__(self, *args, **kwargs):
         super(RegistrationForm, self).__init__(*args, **kwargs)
         self.fields["first_name"].required = False
-        self.fields["middle_name"].required = False
         self.fields["last_name"].required = False
 
     def save(self, commit=True):
@@ -89,7 +85,7 @@ class UserForm(ModelForm):
     )
 
     class Meta:
-        model = CustomUser
+        model = User
         exclude = ["created_at", "updated_at"]
         widgets = CUSTOM_WIDGETS
 

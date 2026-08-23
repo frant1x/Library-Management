@@ -1,6 +1,6 @@
 from django.db import models, DataError
 from django.contrib import admin
-from authentication.models import CustomUser
+from authentication.models import User
 from book.models import Book
 
 
@@ -22,7 +22,7 @@ class Order(models.Model):
     """
 
     book = models.ForeignKey(Book, on_delete=models.CASCADE, default=None)
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, default=None)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=None)
     created_at = models.DateTimeField(auto_now_add=True)
     end_at = models.DateTimeField(default=None, null=True, blank=True)
     plated_end_at = models.DateTimeField(default=None)

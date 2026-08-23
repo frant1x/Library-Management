@@ -2,7 +2,7 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
-from .models import CustomUser
+from .models import User
 from order.models import Order
 from .forms import *
 
@@ -45,7 +45,7 @@ def log_out(request):
 def show_users(request):
     if not request.user.is_active:
         return redirect(reverse("authentication:login"))
-    users = CustomUser.get_all()
+    users = User.get_all()
     context = {"users": users}
     return render(request, "authentication/users.html", context=context)
 
@@ -54,7 +54,7 @@ def show_user(request, user_id):
     if not request.user.is_active:
         return redirect(reverse("authentication:login"))
     if request.user.is_superuser or request.user.id == user_id:
-        user = CustomUser.get_by_id(user_id)
+        user = User.get_by_id(user_id)
         if request.method == "POST":
             form = UserForm(request.POST, instance=user)
             if form.is_valid():
@@ -71,7 +71,7 @@ def show_user_books(request, user_id):
     if not request.user.is_active:
         return redirect(reverse("authentication:login"))
     if request.user.is_superuser or request.user.id == user_id:
-        user = CustomUser.get_by_id(user_id)
+        user = User.get_by_id(user_id)
         books = user.books.all()
         context = {"books": books, "user_name": user.first_name, "filter": False}
         return render(request, "book/books.html", context=context)
@@ -83,7 +83,7 @@ def show_user_orders(request, user_id):
     if not request.user.is_active:
         return redirect(reverse("authentication:login"))
     if request.user.is_superuser or request.user.id == user_id:
-        user = CustomUser.get_by_id(user_id)
+        user = User.get_by_id(user_id)
         orders = Order.objects.filter(user=user)
         context = {"orders": orders}
         return render(request, "order/orders.html", context=context)

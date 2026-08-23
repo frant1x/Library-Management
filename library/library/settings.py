@@ -35,12 +35,7 @@ INSTALLED_APPS = [
 ]
 
 # Custom user model
-AUTH_USER_MODEL = "authentication.CustomUser"
-
-AUTHENTICATION_BACKENDS = [
-    "authentication.auth_backends.EmailBackend",
-    "django.contrib.auth.backends.ModelBackend",  # Keep the default as fallback
-]
+AUTH_USER_MODEL = "authentication.User"
 
 # Middleware configuration
 MIDDLEWARE = [
