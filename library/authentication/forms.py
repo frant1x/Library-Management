@@ -1,8 +1,6 @@
-from django.forms import ModelForm
-
 from django import forms
-
 from .models import User
+from django.contrib.auth.password_validation import validate_password
 
 CUSTOM_WIDGETS = {
     "first_name": forms.TextInput(
@@ -37,40 +35,43 @@ CUSTOM_WIDGETS = {
 }
 
 
-class RegistrationForm(ModelForm):
+class RegistrationForm(forms.ModelForm):
+    """Form for registering a new user."""
 
     class Meta:
         model = User
-        fields = ["first_name", "last_name", "email", "password", "role"]
+        fields = ["first_name", "last_name", "email", "password"]
         widgets = {key: CUSTOM_WIDGETS[key] for key in fields}
 
-    def __init__(self, *args, **kwargs):
-        super(RegistrationForm, self).__init__(*args, **kwargs)
-        self.fields["first_name"].required = False
-        self.fields["last_name"].required = False
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        return email.lower().strip() if email else email
+
+    # def clean_password(self):
+    #     """Validate the password using Django's built-in validators."""
+    #     password = self.cleaned_data.get("password")
+    #     validate_password(password)
+    #     return password
 
     def save(self, commit=True):
-        user = super(RegistrationForm, self).save(commit=False)
+        user = super().save(commit=False)
         user.set_password(self.cleaned_data["password"])
-        user.is_active = True
-        if user.role == 1:
-            user.is_superuser = True
-            user.is_staff = True
-        else:
-            user.is_superuser = False
-            user.is_staff = False
+        user.role = User.Roles.VISITOR
         if commit:
             user.save()
         return user
 
 
 class LoginForm(forms.Form):
+    """Form for logging in a user."""
 
     email = forms.EmailField(widget=CUSTOM_WIDGETS["email"])
     password = forms.CharField(widget=CUSTOM_WIDGETS["password"])
 
 
-class UserForm(ModelForm):
+class UserForm(forms.ModelForm):
+    """Form for updating user information."""
+
     created_at = forms.DateTimeField(
         label="Created_at",
         disabled=True,
@@ -86,28 +87,23 @@ class UserForm(ModelForm):
 
     class Meta:
         model = User
-        exclude = ["created_at", "updated_at"]
+        fields = "__all__"
         widgets = CUSTOM_WIDGETS
 
     def __init__(self, *args, **kwargs):
         super(UserForm, self).__init__(*args, **kwargs)
-        self.fields["last_login"].disabled = True
-        self.fields["is_active"].disabled = True
-        self.fields["is_superuser"].disabled = True
-        self.fields["is_staff"].disabled = True
+        readonly_fields = [
+            "password",
+            "role",
+            "last_login",
+            "is_active",
+            "is_superuser",
+            "is_staff",
+        ]
+
+        for field_name in readonly_fields:
+            self.fields[field_name].disabled = True
+
         if self.instance and self.instance.pk:
             self.fields["created_at"].initial = self.instance.created_at
             self.fields["updated_at"].initial = self.instance.updated_at
-
-    def save(self, commit=True):
-        user = super(UserForm, self).save(commit=False)
-        user.set_password(self.cleaned_data["password"])
-        if user.role == 1:
-            user.is_superuser = True
-            user.is_staff = True
-        else:
-            user.is_superuser = False
-            user.is_staff = False
-        if commit:
-            user.save()
-        return user
