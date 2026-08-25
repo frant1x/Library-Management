@@ -1,47 +1,64 @@
 from django.contrib import admin
-
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import User
 
 
-class UserAdmin(admin.ModelAdmin):
+@admin.register(User)
+class UserAdmin(BaseUserAdmin):
     list_display = [
+        "email",
         "first_name",
         "last_name",
-        "email",
-        "created_at",
         "role",
-        "is_superuser",
+        "is_active",
+        "created_at",
     ]
-    list_filter = ["first_name", "last_name", "created_at", "role", "is_superuser"]
-    readonly_fields = ["created_at", "updated_at"]
+
+    list_filter = ["role", "is_active", "created_at"]
+
+    search_fields = ["last_name"]
+
+    ordering = ["last_name"]
+
+    readonly_fields = ["created_at", "updated_at", "last_login"]
+
     fieldsets = [
         (
-            None,
+            "Personal Info",
             {
                 "fields": [
+                    "email",
+                    "password",
                     "first_name",
                     "last_name",
-                    "middle_name",
-                    ("email", "password"),
                 ],
-            },
-        ),
-        (
-            "Date options",
-            {
-                "classes": ["collapse"],
-                "fields": ["created_at", "last_login", "updated_at"],
             },
         ),
         (
             "Permissions",
             {
+                "fields": [
+                    "role",
+                    ("is_active", "is_staff", "is_superuser"),
+                ],
+            },
+        ),
+        (
+            "Important Dates",
+            {
                 "classes": ["collapse"],
-                "fields": ["role", ("is_active", "is_superuser", "is_staff")],
+                "fields": ["created_at", "updated_at", "last_login"],
             },
         ),
     ]
-    search_fields = ["first_name", "last_name"]
 
-
-admin.site.register(User, UserAdmin)
+    # Форма створення нового користувача через кнопку "+ Додати" в адмінці
+    add_fieldsets = [
+        (
+            None,
+            {
+                "classes": ["wide"],
+                "fields": ["email", "first_name", "last_name", "password"],
+            },
+        ),
+    ]
