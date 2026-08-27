@@ -1,43 +1,40 @@
-# Create your views here.
-from django.shortcuts import redirect, render
-from django.urls import reverse
+from django.urls import reverse_lazy
+from django.shortcuts import redirect
+from django.views.generic import ListView, CreateView, UpdateView, DeleteView
+from library.mixins import StaffRequiredMixin
 from .forms import AuthorForm
 from .models import Author
 
 
-def all_authors(request):
-    if not request.user.is_active:
-        return redirect(reverse("authentication:login"))
-    authors = Author.get_all()
-    form = AuthorForm()
-    context = {"authors": authors, "form": form}
-    return render(request, "author/authors.html", context=context)
+class AuthorListView(ListView):
+    model = Author
+    template_name = "author/authors.html"
+    context_object_name = "authors"
+    ordering = ["last_name", "first_name"]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.user.is_staff:
+            context["form"] = AuthorForm()
+        return context
 
 
-def create_author(request):
-    if request.method == "POST":
-        if request.user.is_superuser:
-            form = AuthorForm(request.POST)
-            if form.is_valid():
-                form.save()
-        return redirect(reverse("author:all_authors"))
+class AuthorCreateView(StaffRequiredMixin, CreateView):
+    form_class = AuthorForm
+    success_url = reverse_lazy("author:all_authors")
+    failure_url = reverse_lazy("authors:all_authors")
+
+    def form_invalid(self, form):
+        return redirect(self.failure_url)
 
 
-def edit_author(request, author_id):
-    if not request.user.is_active:
-        return redirect(reverse("authentication:login"))
-    author = Author.get_by_id(author_id)
-    if request.method == "POST":
-        if request.user.is_superuser:
-            form = AuthorForm(request.POST, instance=author)
-            if form.is_valid():
-                form.save()
-        return redirect(reverse("author:all_authors"))
-    form = AuthorForm(instance=author)
-    return render(request, "author/edit_author.html", {"form": form})
+class AuthorEditView(StaffRequiredMixin, UpdateView):
+    model = Author
+    form_class = AuthorForm
+    template_name = "author/edit_author.html"
+    success_url = reverse_lazy("author:all_authors")
 
 
-def delete_author(request, author_id):
-    if request.user.is_superuser:
-        Author.delete_by_id(author_id)
-    return redirect(reverse("author:all_authors"))
+class AuthorDeleteView(StaffRequiredMixin, DeleteView):
+    model = Author
+    success_url = reverse_lazy("author:all_authors")

@@ -4,8 +4,8 @@ from . import views
 
 app_name = "author"
 urlpatterns = [
-    path("", views.all_authors, name="all_authors"),
-    path("create/", views.create_author, name="create_author"),
-    path("edit/<int:author_id>/", views.edit_author, name="edit_author"),
-    path("delete/<int:author_id>/", views.delete_author, name="delete_author"),
+    path("", views.AuthorListView.as_view(), name="all_authors"),
+    path("create/", views.AuthorCreateView.as_view(), name="create_author"),
+    path("<int:pk>/edit", views.AuthorEditView.as_view(), name="edit_author"),
+    path("<int:pk>/delete", views.AuthorDeleteView.as_view(), name="delete_author"),
 ]

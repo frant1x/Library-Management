@@ -13,22 +13,12 @@
             <div class="modal-body">
                 <form action="{% url 'author:create_author' %}" id="createForm" method="post">
                     {% csrf_token %}
+                    {% for field in form %}
                     <div class="mb-3">
-                        <label for="" class="col-form-label">Name:</label>
-                        {{ form.name }}
+                        <label for="" class="col-form-label">{{ field.label }}:</label>
+                        {{ field }}
                     </div>
-                    <div class="mb-3">
-                        <label for="surname" class="col-form-label">Surname:</label>
-                        {{ form.surname }}
-                    </div>
-                    <div class="mb-3">
-                        <label for="patronymic" class="col-form-label">Patronymic:</label>
-                        {{ form.patronymic }}
-                    </div>
-                    <div class="mb-3">
-                        <label for="patronymic" class="col-form-label">Books:</label>
-                        {{ form.books }}
-                    </div>
+                    {% endfor %}
                 </form>
             </div>
             <div class="modal-footer">
@@ -68,7 +58,7 @@
                     preserveAspectRatio="xMidYMid slice" focusable="false">
                     <rect width="100%" height="100%" fill="#55595c"></rect>
                     <text x="50%" y="50%" fill="#eceeef" dy=".3em">
-                        {{ author.name }} {{ author.surname }}
+                        {{ author.first_name }} {{ author.last_name }}
                     </text>
                 </svg>
                 <div class="card-body">
@@ -80,10 +70,14 @@
                         {% endfor %}
                     </p>
                     <div class="d-flex justify-content-between align-items-center">
-                        {% if request.user.is_superuser %}
+                        {% if request.user.is_staff %}
                         <div class="btn-group">
-                            <a href="{% url 'author:delete_author' author.id %}"
-                                class="btn btn-sm btn-outline-secondary">Delete</a>
+                            <form method="post" action="{% url 'author:delete_author' author.id %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                    Delete
+                                </button>
+                            </form>
                             <a href="{% url 'author:edit_author' author.id %}"
                                 class="btn btn-sm btn-outline-secondary">Edit</a>
                         </div>

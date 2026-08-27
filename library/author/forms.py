@@ -1,22 +1,18 @@
-from django.forms import ModelForm
 from django import forms
-
+from django_countries.widgets import CountrySelectWidget
 from .models import Author
 
 
-class AuthorForm(ModelForm):
+class AuthorForm(forms.ModelForm):
     class Meta:
         model = Author
         fields = "__all__"
         widgets = {
-            "name": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Name"}
+            "first_name": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "First name"}
             ),
-            "surname": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Surname"}
+            "last_name": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Last name"}
             ),
-            "patronymic": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Patronymic"}
-            ),
-            "books": forms.SelectMultiple(attrs={"class": "form-select"}),
+            "country": CountrySelectWidget(attrs={"class": "form-select"}),
         }
