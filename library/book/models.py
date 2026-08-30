@@ -6,7 +6,7 @@ class Book(models.Model):
     """Represents a book available in the library catalog."""
 
     title = models.CharField(max_length=128)
-    description = models.CharField(max_length=256, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
     author = models.ForeignKey(Author, on_delete=models.PROTECT, related_name="books")
     count = models.PositiveIntegerField(default=1)
 

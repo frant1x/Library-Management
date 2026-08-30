@@ -1,75 +1,75 @@
-# Create your views here.
-from django.shortcuts import redirect, render, get_object_or_404
-from django.urls import reverse
+from django.urls import reverse_lazy
+from django.views.generic import ListView, CreateView, DetailView, UpdateView
+from library.mixins import StaffRequiredMixin
 from .models import Book
-from author.models import Author
-from .forms import BookForm
+from .forms import BookForm, BookFilterForm
 
 
-def all_books(request):
-    if not request.user.is_active:
-        return redirect(reverse("authentication:login"))
-    books = Book.get_all()
-    context = {"books": books, "filter": False}
-    return render(request, "book/books.html", context=context)
+class BookListView(ListView):
+    """Displays a list of books with optional GET filtering and search."""
+
+    model = Book
+    template_name = "book/books.html"
+    context_object_name = "books"
+
+    def get_queryset(self):
+        """Build and filter the book queryset based on validated GET parameters."""
+        queryset = Book.objects.select_related("author").order_by("title")
+        self.filter_form = BookFilterForm(self.request.GET)
+
+        if self.filter_form.is_valid():
+            data = self.filter_form.cleaned_data
+
+            if title := data.get("title"):
+                queryset = queryset.filter(title__icontains=title)
+
+            if author := data.get("author"):
+                queryset = queryset.filter(author=author)
+
+            if (count_min := data.get("count_min")) is not None:
+                queryset = queryset.filter(count__gte=int(count_min))
+
+            if (count_max := data.get("count_max")) is not None:
+                queryset = queryset.filter(count__lte=count_max)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        """Inject the bound filter form and active filter status into the template context."""
+        context = super().get_context_data(**kwargs)
+        context["filter_form"] = self.filter_form
+        context["is_filtered"] = any(
+            self.request.GET.get(param)
+            for param in ["title", "author", "count_min", "count_max"]
+        )
+        return context
 
 
-def specific_book(request, book_id):
-    if not request.user.is_active:
-        return redirect(reverse("authentication:login"))
-    book = Book.get_by_id(book_id)
-    context = {"book": book}
-    return render(request, "book/book.html", context=context)
+class BookCreateView(StaffRequiredMixin, CreateView):
+    """View to handle book creation for authorized staff members."""
+
+    model = Book
+    form_class = BookForm
+    template_name = "book/add_book.html"
+    success_url = reverse_lazy("book:all_books")
 
 
-def filter_books(request):
-    if not request.user.is_active:
-        return redirect(reverse("authentication:login"))
+class BookDetailView(DetailView):
+    """Renders detailed information for a single book instance."""
 
-    if request.method == "POST":
-        filter_conditions = {}
+    model = Book
+    template_name = "book/book.html"
+    context_object_name = "book"
 
-        if request.POST.get("title") != "":
-            title = request.POST.get("title")
-            filter_conditions["name__icontains"] = title
-
-        if request.POST.get("author") != "":
-            author_name, author_surname = request.POST.get("author").split()
-            author_conditions = {"name": author_name, "surname": author_surname}
-            author = Author.objects.filter(**author_conditions)[0]
-            filter_conditions["authors"] = author.id
-
-        if request.POST.get("count_min") != "":
-            count_min = request.POST.get("count_min")
-            filter_conditions["count__gte"] = count_min
-
-        if request.POST.get("count_max") != "":
-            count_max = request.POST.get("count_max")
-            filter_conditions["count__lte"] = count_max
-
-        books = Book.objects.filter(**filter_conditions)
-        context = {"books": books, "filter": True}
-        return render(request, "book/books.html", context=context)
+    def get_queryset(self):
+        """Pre-fetch author relation to avoid extra database hits."""
+        return Book.objects.select_related("author")
 
 
-def add_book(request):
-    if request.method == "POST":
-        form = BookForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("add_book")
-    else:
-        form = BookForm()
-    return render(request, "book/add_book.html", {"form": form})
+class BookUpdateView(StaffRequiredMixin, UpdateView):
+    """Handles book updates for authorized staff members."""
 
-
-def edit_book(request, pk):
-    book = get_object_or_404(Book, pk=pk)
-    if request.method == "POST":
-        form = BookForm(request.POST, instance=book)
-        if form.is_valid():
-            form.save()
-            return redirect("edit_book")
-    else:
-        form = BookForm(instance=book)
-    return render(request, "book/edit_book.html", {"form": form})
+    model = Book
+    form_class = BookForm
+    template_name = "book/edit_book.html"
+    success_url = reverse_lazy("book:all_books")

@@ -3,13 +3,11 @@
     <div class="p-5 mb-4 rounded-3">
         <div class="container-fluid py-5">
             {% if book %}
-            <h1 class="display-5 fw-bold">{{ book.name }}</h1>
+            <h1 class="display-5 fw-bold">{{ book.title }}</h1>
             <p class="col-md-8 fs-4" style="color:darkgray;">
-                {% for author in book.authors.all %}
-                {{ author.name }} {{ author.surname }}
-                {% endfor %}
+                {{ book.author.first_name }} {{ book.author.last_name }}
             </p>
-            <p class="col-md-8 fs-4">{{ book.description }}.</p>
+            <p class="col-md-8 fs-4">{{ book.description }}</p>
             {% else %}
             <h1 class="display-5 fw-bold">There is no book with such id</h1>
             {% endif %}

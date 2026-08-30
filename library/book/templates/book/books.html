@@ -11,26 +11,25 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form action="{% url 'book:filter_books' %}" id="filterForm" method="post">
-          {% csrf_token %}
+        <form action="{% url 'book:all_books' %}" id="filterForm" method="get">
           <div class="mb-3">
             <label for="title" class="col-form-label">Title:</label>
-            <input type="text" class="form-control" id="title" name="title" />
+            {{ filter_form.title }}
           </div>
           <div class="mb-3">
             <label for="author" class="col-form-label">Author:</label>
-            <input type="text" class="form-control" id="author" name="author" />
+            {{ filter_form.author }}
           </div>
           <div class="col-sm-9 mb-3">
             Count of the book:
             <div class="row">
               <div class="col-6 col-sm-6">
                 <label for="count_min" class="col-form-label">Min:</label>
-                <input type="number" class="form-control" id="count_min" name="count_min" step="1" />
+                {{ filter_form.count_min }}
               </div>
               <div class="col-6 col-sm-6">
                 <label for="count_max" class="col-form-label">Max:</label>
-                <input type="number" class="form-control" id="count_max" name="count_max" step="1" />
+                {{ filter_form.count_max }}
               </div>
             </div>
           </div>
@@ -60,7 +59,7 @@
         <button type="button" class="btn btn-primary my-2" data-bs-toggle="modal" data-bs-target="#filterModal">
           Filter
         </button>
-        {% if filter %}
+        {% if is_filtered %}
         <a href="{% url 'book:all_books' %}" class="btn btn-secondary my-2">Reset</a>
         {% endif %}
       </p>
@@ -76,13 +75,11 @@
         <svg class="bd-placeholder-img card-img-top" width="100%" height="225" xmlns="http://www.w3.org/2000/svg"
           role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false">
           <rect width="100%" height="100%" fill="#55595c"></rect>
-          <text x="50%" y="50%" fill="#eceeef" dy=".3em">{{ book.name }}</text>
+          <text x="50%" y="50%" fill="#eceeef" dy=".3em">{{ book.title }}</text>
         </svg>
         <div class="card-body">
-          <p class="card-text"> Authors:
-            {% for author in book.authors.all %}
-            {{ author.name }} {{ author.surname }}
-            {% endfor %}
+          <p class="card-text"> Author:
+            {{ book.author.first_name }} {{ book.author.last_name }}
           </p>
           <p class="card-text"
             style="overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;">

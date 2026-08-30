@@ -20,6 +20,7 @@ class AuthorListView(ListView):
 
 
 class AuthorCreateView(StaffRequiredMixin, CreateView):
+    model = Author
     form_class = AuthorForm
     success_url = reverse_lazy("author:all_authors")
     failure_url = reverse_lazy("authors:all_authors")
@@ -28,7 +29,7 @@ class AuthorCreateView(StaffRequiredMixin, CreateView):
         return redirect(self.failure_url)
 
 
-class AuthorEditView(StaffRequiredMixin, UpdateView):
+class AuthorUpdateView(StaffRequiredMixin, UpdateView):
     model = Author
     form_class = AuthorForm
     template_name = "author/edit_author.html"
