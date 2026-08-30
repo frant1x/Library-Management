@@ -1,27 +1,29 @@
 from django.contrib import admin
-
 from .models import Order
 
 
+@admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ["book", "user", "created_at", "plated_end_at", "returned"]
-    list_filter = ["book", "user", "created_at", "plated_end_at"]
-    readonly_fields = ["created_at"]
-    fieldsets = [
-        (
-            None,
-            {
-                "fields": ["book", "user"],
-            },
-        ),
-        (
-            "Date information",
-            {
-                "classes": ["collapse"],
-                "fields": ["created_at", "plated_end_at", "end_at"],
-            },
-        ),
+    """Admin interface configuration for managing Order records."""
+
+    list_display = [
+        "id",
+        "book",
+        "user",
+        "created_at",
+        "planned_end_at",
+        "status_badge",
     ]
+    list_filter = ["created_at", "planned_end_at"]
+    search_fields = ["book__title", "user__last_name"]
+    readonly_fields = ["created_at"]
 
-
-admin.site.register(Order, OrderAdmin)
+    @admin.display(description="Status")
+    def status_badge(self, obj):
+        """Render a visual color-coded badge indicating the order state."""
+        if obj.is_closed:
+            return "CLOSED"
+        if obj.is_overdue:
+            return "OVERDUE"
+        else:
+            return "ACTIVE"
