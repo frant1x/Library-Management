@@ -29,4 +29,4 @@ class Order(models.Model):
         """Check if the active order has passed the planned return deadline."""
         if self.is_closed:
             return False
-        return timezone.now() > self.planned_end_at
+        return timezone.localdate() > self.planned_end_at
