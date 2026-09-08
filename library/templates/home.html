@@ -1,53 +1,19 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Home{% endblock %}
 
 {% block content %}
-<div class="container px-4 py-5" id="featured-4">
-    <div class="row g-4 py-5 row-cols-1 row-cols-lg-4">
-        <div class="feature col">
-            <h3 class="fs-2 text-body-emphasis">Books</h3>
-            <ul class="list-group-flush">
-                <li class="list-group-item">• Information about all books</li>
-                <li class="list-group-item">• Opportunity to view a specific book</li>
-                <li class="list-group-item">
-                    • Ability to filter books by various criteria
-                </li>
-            </ul>
-            <a href="{% url 'book:all_books' %}" class="icon-link"> All books </a>
-        </div>
-        <div class="feature col">
-            <h3 class="fs-2 text-body-emphasis">Users</h3>
-            <ul class="list-group-flush">
-                <li class="list-group-item">• Information about all users</li>
-                <li class="list-group-item">• Opportunity to view a specific user</li>
-                <li class="list-group-item" style="visibility: hidden">•</li>
-                <li class="list-group-item" style="visibility: hidden">•</li>
-            </ul>
-            <a href="{% url 'authentication:show_users' %}" class="icon-link">
-                All users
+<div class="px-4 py-5 my-5 text-center">
+    <img src="{% static 'images/favicon.png' %}" alt="Library Logo" width="72" height="57" class="me-2">
+    <h1 class="display-5 fw-bold text-body-emphasis">Library</h1>
+    <div class="col-lg-6 mx-auto">
+        <p class="lead mb-4">Explore our extensive collection of literature, manage your borrowed books,
+            and discover new authors in just a few clicks.</p>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+            <a href="{% url 'book:all_books' %}" class="btn btn-primary btn-lg px-4 gap-3">
+                <i class="bi bi-book me-2"></i>Browse Catalog
             </a>
-        </div>
-        <div class="feature col">
-            <h3 class="fs-2 text-body-emphasis">Orders</h3>
-            <ul class="list-group-flush">
-                <li class="list-group-item">• Information about all orders</li>
-                <li class="list-group-item">• Information about all user's orders</li>
-                <li class="list-group-item">• Opportunity to create an order</li>
-                <li class="list-group-item">• Opportunity to close the order</li>
-            </ul>
-            <a href="{% url 'order:all_orders' %}" class="icon-link"> All orders </a>
-        </div>
-        <div class="feature col">
-            <h3 class="fs-2 text-body-emphasis">Authors</h3>
-            <ul class="list-group-flush">
-                <li class="list-group-item">• Information about all authors</li>
-                <li class="list-group-item">• Opportunity to create a new author</li>
-                <li class="list-group-item">
-                    • Ability to remove the author if he is not attached to any book
-                </li>
-            </ul>
-            <a href="{% url 'author:all_authors' %}" class="icon-link"> All authors </a>
         </div>
     </div>
 </div>
