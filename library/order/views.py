@@ -10,7 +10,7 @@ from .models import Order
 from .forms import OrderCreateForm
 
 
-class OrderListView(ListView):
+class OrderListView(LoginRequiredMixin, ListView):
     """View to list all orders for superusers, redirecting regular users to their own orders."""
 
     model = Order

@@ -4,44 +4,61 @@
 
 {% block content%}
 <section class="py-3 text-center container">
-    <div class="row py-lg-5">
+    <div class="row">
         <div class="col-lg-6 col-md-8 mx-auto">
             <h1 class="fw-light">All Users</h1>
             <p class="lead text-muted">Information about all users.</p>
         </div>
     </div>
 </section>
-<div class="container my-3">
-    {% if users %}
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+<div class="my-3 p-4 bg-body-tertiary rounded-4 shadow-sm border border-secondary border-opacity-25">
+    <div
+        class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-25">
+        <h5 class="mb-0">User Directory</h5>
+        <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill">
+            Total: {{ users|length }}
+        </span>
+    </div>
+    <div class="list-group list-group-flush">
         {% for user in users %}
-        <div class="col">
-            <div class="card shadow-sm" style="text-anchor: middle">
-                <svg class="bd-placeholder-img card-img-top" width="100%" height="225"
-                    xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
-                    preserveAspectRatio="xMidYMid slice" focusable="false">
-                    <rect width="100%" height="100%" fill="#55595c"></rect>
-                    <text x="50%" y="50%" fill="#eceeef" dy=".3em">{{ user.first_name }} {{ user.last_name }}</text>
-                </svg>
-                <div class="card-body">
-                    {% if user.role == 0 %}
-                    <p class="card-text">Visitor</p>
-                    {% else %}
-                    <p class="card-text">Librarian</p>
-                    {% endif %}
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div class="btn-group">
-                            <a href="{% url 'authentication:show_user' user.id %}"
-                                class="btn btn-sm btn-outline-secondary">View</a>
-                        </div>
-                        <small class="text-muted">{{ user.books.all|length }}
-                            book{{user.books.count|pluralize:"s"}}</small>
-                    </div>
-                </div>
+        <div
+            class="list-group-item bg-transparent d-flex align-items-center py-3 px-1 border-secondary border-opacity-25">
+            <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center me-3 flex-shrink-0 fw-semibold"
+                style="width: 42px; height: 42px;">
+                {{ user.first_name|first|default:"U" }}{{ user.last_name|first|default:"" }}
             </div>
+            <div class="flex-grow-1 min-w-0 me-3">
+                <div class="d-flex align-items-center gap-2 mb-1">
+                    <strong class="text-truncate">{{ user.first_name }} {{ user.last_name }}</strong>
+
+                    {% if user.is_staff == 1 %}
+                    <span
+                        class="badge bg-warning-subtle text-warning border border-warning-subtle small py-0 px-2">Staff</span>
+                    {% else %}
+                    <span
+                        class="badge bg-info-subtle text-info border border-info-subtle small py-0 px-2">Visitor</span>
+                    {% endif %}
+
+                    {% if not user.is_active %}
+                    <span
+                        class="badge bg-danger-subtle text-danger border border-danger-subtle small py-0 px-2">Inactive</span>
+                    {% endif %}
+                </div>
+                <span class="text-secondary small d-block text-truncate">{{ user.email }}</span>
+            </div>
+            <div class="flex-shrink-0">
+                <a href="{% url 'authentication:show_user' user.pk %}" class="btn btn-sm btn-outline-primary px-3">
+                    View
+                </a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-5 text-secondary">
+            <i class="bi bi-people fs-1 d-block mb-2 opacity-50"></i>
+            <h6 class="text-body-secondary mb-1">No users found</h6>
+            <p class="small mb-0">There are currently no registered users in the database.</p>
         </div>
         {% endfor %}
     </div>
-    {% endif %}
 </div>
 {% endblock %}

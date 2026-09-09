@@ -1,6 +1,7 @@
 from django import forms
-from .models import User
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.password_validation import validate_password
+from .models import User
 
 CUSTOM_WIDGETS = {
     "first_name": forms.TextInput(
@@ -62,15 +63,59 @@ class RegistrationForm(forms.ModelForm):
         return user
 
 
-class LoginForm(forms.Form):
+class LoginForm(AuthenticationForm):
     """Form for logging in a user."""
 
-    email = forms.EmailField(widget=CUSTOM_WIDGETS["email"])
+    username = forms.EmailField(widget=CUSTOM_WIDGETS["email"])
     password = forms.CharField(widget=CUSTOM_WIDGETS["password"])
 
 
-class UserForm(forms.ModelForm):
-    """Form for updating user information."""
+class BaseUserForm(forms.ModelForm):
+    """Base form with common personal fields."""
+
+    class Meta:
+        model = User
+        fields = ["first_name", "last_name", "email"]
+        widgets = CUSTOM_WIDGETS
+
+
+class UserProfileForm(BaseUserForm):
+    """Form for regular users to update their personal details."""
+
+    new_password = forms.CharField(
+        label="Password",
+        required=False,
+        widget=forms.PasswordInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Leave blank to keep current",
+            }
+        ),
+    )
+
+    # def clean(self):
+    #     cleaned_data = super().clean()
+    #     new_pass = cleaned_data.get("new_password")
+
+    #     if new_pass:
+    #         validate_password(new_pass, self.instance)
+
+    #     return cleaned_data
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        new_pass = self.cleaned_data.get("new_password")
+
+        if new_pass:
+            user.set_password(new_pass)
+
+        if commit:
+            user.save()
+        return user
+
+
+class StaffUserForm(BaseUserForm):
+    """Form for librarians to manage reader permissions and statuses."""
 
     created_at = forms.DateTimeField(
         label="Created_at",
@@ -85,18 +130,19 @@ class UserForm(forms.ModelForm):
         widget=CUSTOM_WIDGETS["updated_at"],
     )
 
-    class Meta:
-        model = User
-        fields = "__all__"
-        widgets = CUSTOM_WIDGETS
-
-    def __init__(self, *args, **kwargs):
-        super(UserForm, self).__init__(*args, **kwargs)
-        readonly_fields = [
-            "password",
-            "role",
+    class Meta(BaseUserForm.Meta):
+        fields = BaseUserForm.Meta.fields + [
             "last_login",
             "is_active",
+            "is_staff",
+            "is_superuser",
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        readonly_fields = [
+            "last_login",
             "is_superuser",
             "is_staff",
         ]

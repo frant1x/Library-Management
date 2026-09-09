@@ -9,13 +9,13 @@
         </a>
     </div>
     <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
-        {% if user.is_staff %}
+        {% if request.user.is_staff %}
         <li class="nav-item dropdown">
             <button type="button" class="nav-link dropdown-toggle px-2" data-bs-toggle="dropdown"
                 aria-expanded="false">User
                 Management</button>
             <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="{% url 'authentication:show_user' %}">My Profile</a></li>
+                <li><a class="dropdown-item" href="{% url 'authentication:auth_user' %}">My Profile</a></li>
                 <li>
                     <hr class="dropdown-divider">
                 </li>
@@ -24,13 +24,13 @@
             </ul>
         </li>
         {% else %}
-        <li><a href="{% url 'authentication:show_user' %}" class="nav-link px-2">Profile</a></li>
+        <li><a href="{% url 'authentication:auth_user' %}" class="nav-link px-2">Profile</a></li>
         {% endif %}
         <li><a href="{% url 'book:all_books' %}" class="nav-link px-2">Books</a></li>
         <li><a href="{% url 'author:all_authors' %}" class="nav-link px-2">Authors</a></li>
         <li><a href="{% url 'order:all_orders' %}" class="nav-link px-2">Orders</a></li>
     </ul>
-    <div class="col-md-3 text-end"> {% if not user.is_authenticated %}
+    <div class="col-md-3 text-end"> {% if not request.user.is_authenticated %}
         <a href="{% url 'authentication:login' %}" class="btn btn-outline-primary me-2">Log-in</a>
         <a href="{% url 'authentication:register' %}" class="btn btn-primary">Sign-up</a>
         {% else %}

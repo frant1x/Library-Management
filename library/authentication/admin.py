@@ -11,7 +11,7 @@ class UserAdmin(BaseUserAdmin):
         "last_name",
         "role",
         "is_active",
-        "created_at",
+        "last_login",
     ]
 
     list_filter = ["role", "is_active", "created_at"]

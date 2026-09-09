@@ -1,78 +1,73 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.urls import reverse
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
+from django.shortcuts import redirect
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, ListView, UpdateView
+from django.contrib.auth import login, update_session_auth_hash
+from django.contrib.auth.views import LoginView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from library.mixins import StaffRequiredMixin
 from .models import User
-
-# from order.models import Order
-from .forms import RegistrationForm, LoginForm, UserForm
+from .forms import RegistrationForm, LoginForm, UserProfileForm, StaffUserForm
 
 
-def register(request):
+class RegisterView(CreateView):
     """View for user registration."""
-    if request.method == "POST":
-        form = RegistrationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("authentication:login")
-    else:
-        form = RegistrationForm()
 
-    return render(request, "authentication/register.html", {"form": form})
+    form_class = RegistrationForm
+    template_name = "authentication/register.html"
+    success_url = reverse_lazy("home")
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            return redirect(self.success_url)
+        return super().dispatch(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        self.object = form.save()
+        login(self.request, self.object)
+        return redirect(self.get_success_url())
 
 
-def log_in(request):
+class CustomLoginView(LoginView):
     """View for user login."""
-    if request.method == "POST":
-        form = LoginForm(request.POST)
-        if form.is_valid():
-            email = form.cleaned_data.get("email")
-            password = form.cleaned_data.get("password")
-            user = authenticate(request, email=email, password=password)
-            if user is not None:
-                login(request, user)
-                return redirect("home")
-            form.add_error(None, "Invalid email or password.")
-    else:
-        form = LoginForm()
 
-    return render(request, "authentication/log_in.html", {"form": form})
+    template_name = "authentication/log_in.html"
+    form_class = LoginForm
+    redirect_authenticated_user = True
 
 
-@login_required
-def log_out(request):
-    logout(request)
-    return redirect("home")
+class UserListView(StaffRequiredMixin, ListView):
+    """List of registered users accessible only to library staff."""
+
+    model = User
+    template_name = "authentication/users.html"
+    context_object_name = "users"
+    ordering = ["last_name", "first_name"]
 
 
-@login_required
-def show_users(request):
-    users = User.objects.all().order_by("id")
-    context = {"users": users}
-    return render(request, "authentication/users.html", context=context)
+class UserProfileView(LoginRequiredMixin, UpdateView):
+    """View and update current authenticated user's profile."""
+
+    model = User
+    form_class = UserProfileForm
+    template_name = "authentication/profile.html"
+    success_url = reverse_lazy("authentication:auth_user")
+
+    def get_object(self, queryset=None):
+        return self.request.user
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        update_session_auth_hash(self.request, form.instance)
+        return response
 
 
-@login_required
-def show_user(request, user_id):
-    if request.user.is_superuser or request.user.id == user_id:
-        user = get_object_or_404(User, user_id)
+class UserUpdateView(StaffRequiredMixin, UpdateView):
+    """Staff-only view to manage any user by primary key."""
 
-        if request.method == "POST":
-            form = UserForm(request.POST, instance=user)
-            if form.is_valid():
-                form.save()
-
-                if request.user.is_staff:
-                    return redirect("authentication:show_users")
-                return redirect(reverse("authentication:show_user", user_id=user.id))
-        else:
-            form = UserForm(instance=user)
-
-        context = {"form": form}
-        return render(request, "authentication/user.html", context=context)
-    else:
-        raise PermissionDenied
+    model = User
+    form_class = StaffUserForm
+    template_name = "authentication/profile.html"
+    success_url = reverse_lazy("authentication:show_user")
 
 
 # def show_user_books(request, user_id):
@@ -85,15 +80,3 @@ def show_user(request, user_id):
 #         return render(request, "book/books.html", context=context)
 #     else:
 #         return redirect(reverse("book:all_books"))
-
-
-# def show_user_orders(request, user_id):
-#     if not request.user.is_active:
-#         return redirect(reverse("authentication:login"))
-#     if request.user.is_superuser or request.user.id == user_id:
-#         user = User.get_by_id(user_id)
-#         orders = Order.objects.filter(user=user)
-#         context = {"orders": orders}
-#         return render(request, "order/orders.html", context=context)
-#     else:
-#         return redirect(reverse("authentication:home"))
