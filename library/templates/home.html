@@ -1,8 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Home{% endblock %}
-
 {% block content %}
 <div class="px-4 py-5 my-5 text-center">
     <img src="{% static 'images/favicon.png' %}" alt="Library Logo" width="72" height="57" class="me-2">
@@ -11,7 +9,7 @@
         <p class="lead mb-4">Explore our extensive collection of literature, manage your borrowed books,
             and discover new authors in just a few clicks.</p>
         <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-            <a href="{% url 'book:all_books' %}" class="btn btn-primary btn-lg px-4 gap-3">
+            <a href="{% url 'book:book_list' %}" class="btn btn-primary btn-lg px-4 gap-3">
                 <i class="bi bi-book me-2"></i>Browse Catalog
             </a>
         </div>

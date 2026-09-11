@@ -26,7 +26,7 @@
         {% else %}
         <li><a href="{% url 'authentication:auth_user' %}" class="nav-link px-2">Profile</a></li>
         {% endif %}
-        <li><a href="{% url 'book:all_books' %}" class="nav-link px-2">Books</a></li>
+        <li><a href="{% url 'book:book_list' %}" class="nav-link px-2">Books</a></li>
         <li><a href="{% url 'author:all_authors' %}" class="nav-link px-2">Authors</a></li>
         <li><a href="{% url 'order:all_orders' %}" class="nav-link px-2">Orders</a></li>
     </ul>

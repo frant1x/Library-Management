@@ -50,8 +50,8 @@ class BookCreateView(StaffRequiredMixin, CreateView):
 
     model = Book
     form_class = BookForm
-    template_name = "book/add_book.html"
-    success_url = reverse_lazy("book:all_books")
+    template_name = "book/book_form.html"
+    success_url = reverse_lazy("book:book_list")
 
 
 class BookDetailView(DetailView):
@@ -62,7 +62,6 @@ class BookDetailView(DetailView):
     context_object_name = "book"
 
     def get_queryset(self):
-        """Pre-fetch author relation to avoid extra database hits."""
         return Book.objects.select_related("author")
 
 
@@ -71,5 +70,7 @@ class BookUpdateView(StaffRequiredMixin, UpdateView):
 
     model = Book
     form_class = BookForm
-    template_name = "book/edit_book.html"
-    success_url = reverse_lazy("book:all_books")
+    template_name = "book/book_form.html"
+
+    def get_success_url(self):
+        return reverse_lazy("book:book_detail", kwargs={"pk": self.object.pk})
