@@ -68,15 +68,3 @@ class UserUpdateView(StaffRequiredMixin, UpdateView):
     form_class = StaffUserForm
     template_name = "authentication/profile.html"
     success_url = reverse_lazy("authentication:show_user")
-
-
-# def show_user_books(request, user_id):
-#     if not request.user.is_active:
-#         return redirect(reverse("authentication:login"))
-#     if request.user.is_superuser or request.user.id == user_id:
-#         user = User.get_by_id(user_id)
-#         books = user.books.all()
-#         context = {"books": books, "user_name": user.first_name, "filter": False}
-#         return render(request, "book/books.html", context=context)
-#     else:
-#         return redirect(reverse("book:all_books"))
