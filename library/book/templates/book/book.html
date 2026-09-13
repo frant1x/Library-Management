@@ -57,9 +57,12 @@
 
                     <div>
                         {% if book.count > 0 %}
-                        <a href="#" class="btn btn-primary btn-lg px-4 shadow-sm">
-                            <i class="bi bi-journal-plus me-2"></i> Order Book
-                        </a>
+                        <form method="post" action="{% url 'order:order_create' book.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary btn-lg px-4 shadow-sm">
+                                <i class="bi bi-journal-plus me-2"></i> Order Book
+                            </button>
+                        </form>
                         {% else %}
                         <button class="btn btn-secondary btn-lg px-4" disabled>
                             Unavailable

@@ -44,7 +44,21 @@ class UserListView(StaffRequiredMixin, ListView):
     ordering = ["last_name", "first_name"]
 
 
-class UserProfileView(LoginRequiredMixin, UpdateView):
+class ProfileOrdersMixin:
+    """Injects the target user's orders and active tab into the profile context."""
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        target_user = self.get_object()
+
+        context["orders"] = target_user.orders.select_related("book__author").order_by(
+            "end_at", "-created_at"
+        )
+        context["active_tab"] = self.request.GET.get("tab", "info")
+        return context
+
+
+class UserProfileView(LoginRequiredMixin, ProfileOrdersMixin, UpdateView):
     """View and update current authenticated user's profile."""
 
     model = User
@@ -61,7 +75,7 @@ class UserProfileView(LoginRequiredMixin, UpdateView):
         return response
 
 
-class UserUpdateView(StaffRequiredMixin, UpdateView):
+class UserUpdateView(StaffRequiredMixin, ProfileOrdersMixin, UpdateView):
     """Staff-only view to manage any user by primary key."""
 
     model = User

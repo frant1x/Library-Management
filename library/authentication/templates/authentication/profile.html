@@ -18,14 +18,13 @@
             <small class="text-secondary text-truncate d-block">{{ form.instance.email }}</small>
           </div>
         </div>
-
         <hr class="mt-0 mb-3 border-secondary" />
-
         <nav class="nav nav-pills flex-column gap-1">
-          <a class="nav-link active d-flex align-items-center py-2" href="#">
+          <a class="nav-link active d-flex align-items-center py-2" href="?tab=info">
             <i class="bi bi-person me-2"></i> User Info
           </a>
-          <a class="nav-link d-flex align-items-center justify-content-between py-2 link-body-emphasis" href="#">
+          <a class="nav-link d-flex align-items-center justify-content-between py-2 link-body-emphasis"
+            href="?tab=orders">
             <span><i class="bi bi-journal-text me-2"></i> Orders</span>
             {% if form.instance.orders.count %}
             <span class="badge bg-secondary rounded-pill">{{ form.instance.orders.count }}</span>
@@ -40,6 +39,85 @@
         </div>
       </div>
       <div class="col-md-8 col-lg-9 p-4 p-md-5">
+        {% if active_tab == 'orders' %}
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-secondary">
+          <div>
+            <h4 class="mb-1">Order History</h4>
+            <p class="text-secondary small mb-0">Track active loans and past borrowed books.</p>
+          </div>
+          <span class="badge bg-secondary-subtle text-body border border-secondary-subtle px-3 py-2">
+            {{ orders|length }} Record{{ orders|length|pluralize }}
+          </span>
+        </div>
+        <div class="card bg-body-tertiary border-secondary border-opacity-25 rounded-4 shadow-sm overflow-hidden">
+          {% if orders %}
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-body-secondary text-secondary small text-uppercase">
+                <tr>
+                  <th scope="col" class="ps-4">Book</th>
+                  <th scope="col">Loan Date</th>
+                  <th scope="col">Target / Return Date</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for order in orders %}
+                <tr>
+                  <td class="ps-4">
+                    <div>
+                      <a href="{% url 'book:book_detail' order.book.id %}"
+                        class="fw-semibold text-body text-decoration-none">
+                        {{ order.book.title }}
+                      </a>
+                      <div class="text-secondary small">
+                        {{ order.book.author.first_name }} {{ order.book.author.last_name }}
+                      </div>
+                    </div>
+                  </td>
+                  <td class="small text-secondary">
+                    {{ order.created_at|date:"M d, Y"|default:"—" }}
+                  </td>
+                  <td class="small">
+                    {% if order.is_closed %}
+                    <span class="text-secondary">Returned: {{ order.end_at|date:"M d, Y" }}</span>
+                    {% else %}
+                    <span class="{% if order.is_overdue %}text-danger fw-semibold{% else %}text-body{% endif %}">
+                      Due: {{ order.planned_end_at|date:"M d, Y" }}
+                    </span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if order.is_closed %}
+                    <span
+                      class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1">
+                      <i class="bi bi-check-circle me-1"></i> Returned
+                    </span>
+                    {% elif order.is_overdue %}
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1">
+                      <i class="bi bi-exclamation-triangle me-1"></i> Overdue
+                    </span>
+                    {% else %}
+                    <span
+                      class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-1">
+                      <i class="bi bi-clock-history me-1"></i> Active
+                    </span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="text-center py-5 text-secondary">
+            <i class="bi bi-journal-x fs-1 d-block mb-3 opacity-50"></i>
+            <h5>No orders found</h5>
+            <p class="small mb-0">This user has not borrowed any books yet.</p>
+          </div>
+          {% endif %}
+        </div>
+        {% else %}
         <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-secondary">
           <div>
             <h4 class="mb-1">User Information</h4>
@@ -51,30 +129,25 @@
           <span class="badge bg-info-subtle text-info border border-info-subtle px-3 py-2">Visitor</span>
           {% endif %}
         </div>
-
         <form method="post" novalidate>
           {% csrf_token %}
-
           <div class="row g-3 mb-3">
             <div class="col-sm-6">
               <label class="form-label">First name</label>
               {{ form.first_name }}
               <div class="text-danger small">{{ form.first_name.errors }}</div>
             </div>
-
             <div class="col-sm-6">
               <label class="form-label">Last name</label>
               {{ form.last_name }}
               <div class="text-danger small">{{ form.last_name.errors }}</div>
             </div>
-
             <div class="col-12">
               <label class="form-label">Email</label>
               {{ form.email }}
               <div class="text-danger small">{{ form.email.errors }}</div>
             </div>
           </div>
-
           {% if form.new_password %}
           <div class="row mb-3">
             <div class="col-12">
@@ -82,7 +155,6 @@
               {{ form.new_password }}
             </div>
           </div>
-
           {% else %}
           <div class="row g-3 mb-3">
             <div class="col-sm-4">
@@ -98,7 +170,6 @@
               {{ form.updated_at }}
             </div>
           </div>
-
           <hr class="mb-3 border-secondary" />
           <h5 class="mb-3 text-warning">Staff Permissions</h5>
           <div class="d-flex flex-wrap gap-4">
@@ -112,15 +183,13 @@
             </div>
           </div>
           {% endif %}
-
           <hr class="my-4 border-secondary" />
-
           <div class="d-flex justify-content-end">
             <button type="submit" class="btn btn-primary px-4 py-2">Update User</button>
           </div>
         </form>
+        {% endif %}
       </div>
-
     </div>
   </div>
 </div>
