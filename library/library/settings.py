@@ -26,13 +26,10 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_countries",
-    # "rest_framework",
-    # "rest_framework.authtoken",
     "authentication",
     "author",
     "book",
     "order",
-    # "api",
 ]
 
 # Custom user model
