@@ -1,0 +1,27 @@
+{% if messages %}
+<div class="messages-container mb-3">
+    {% for message in messages %}
+    <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 5000)" x-show="show"
+        x-transition.opacity.duration.400ms
+        class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags|default:'info' }}{% endif %} alert-dismissible shadow-sm border border-opacity-25"
+        role="alert">
+
+        <div class="d-flex align-items-center">
+            {% if message.tags == 'success' %}
+            <i class="bi bi-check-circle-fill me-2 fs-5"></i>
+            {% elif message.tags == 'error' %}
+            <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
+            {% elif message.tags == 'warning' %}
+            <i class="bi bi-exclamation-circle-fill me-2 fs-5"></i>
+            {% else %}
+            <i class="bi bi-info-circle-fill me-2 fs-5"></i>
+            {% endif %}
+            <span>{{ message }}</span>
+        </div>
+
+        <button type="button" class="btn-close shadow-none" @click="show = false" aria-label="Close">
+        </button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}

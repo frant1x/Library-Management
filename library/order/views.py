@@ -2,11 +2,13 @@ from django.shortcuts import redirect, get_object_or_404
 from django.utils import timezone
 from django.views import View
 from django.views.generic import ListView
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import F
 from library.mixins import StaffRequiredMixin
 from .models import Order
 from book.models import Book
-from authentication.models import User
+from .forms import OrderFilterForm
 
 
 class OrderListView(LoginRequiredMixin, ListView):
@@ -22,43 +24,43 @@ class OrderListView(LoginRequiredMixin, ListView):
         if not self.request.user.is_staff:
             queryset = queryset.filter(user=self.request.user)
 
-        book_query = self.request.GET.get("book")
-        if book_query:
-            queryset = queryset.filter(book__title__icontains=book_query.strip())
+        self.filter_form = OrderFilterForm(
+            self.request.GET or None, is_staff=self.request.user.is_staff
+        )
 
-        user_id = self.request.GET.get("user")
-        if user_id and self.request.user.is_staff:
-            user_id = user_id.strip()
-            if user_id.isdigit():
-                queryset = queryset.filter(user_id=int(user_id))
-            else:
-                queryset = queryset.none()
+        if not self.filter_form.is_valid():
+            return queryset.order_by("-created_at")
 
-        status = self.request.GET.get("status")
-        today = timezone.localdate()
-        if status == "active":
-            queryset = queryset.filter(end_at__isnull=True)
-        elif status == "overdue":
-            queryset = queryset.filter(end_at__isnull=True, planned_end_at__lt=today)
-        elif status == "returned":
-            queryset = queryset.filter(end_at__isnull=False)
+        data = self.filter_form.cleaned_data
+
+        if book := data.get("book"):
+            queryset = queryset.filter(book__title__icontains=book)
+
+        if self.request.user.is_staff and (user := data.get("user")):
+            queryset = queryset.filter(user=user)
+
+        if status := data.get("status"):
+            now = timezone.now()
+            if status == "active":
+                queryset = queryset.filter(end_at__isnull=True)
+            elif status == "overdue":
+                queryset = queryset.filter(end_at__isnull=True, planned_end_at__lt=now)
+            elif status == "returned":
+                queryset = queryset.filter(end_at__isnull=False)
 
         sort_mapping = {
-            "created_desc": "-created_at",
-            "created_asc": "created_at",
-            "due_asc": "planned_end_at",
-            "due_desc": "-planned_end_at",
-            "returned_desc": "-end_at",
+            "created_desc": ["-created_at"],
+            "created_asc": ["created_at"],
+            "due_asc": [F("planned_end_at").asc(nulls_last=True)],
+            "due_desc": [F("planned_end_at").desc(nulls_last=True)],
+            "returned_desc": [F("end_at").desc(nulls_last=True), "-created_at"],
         }
-        sort_by = self.request.GET.get("sort", "created_desc")
-        return queryset.order_by(sort_mapping.get(sort_by, "-created_at"))
+        ordering = sort_mapping.get(data.get("sort"), ["-created_at"])
+        return queryset.order_by(*ordering)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        if self.request.user.is_staff:
-            context["users"] = User.objects.all()
-
+        context["filter_form"] = self.filter_form
         return context
 
 
@@ -76,6 +78,8 @@ class OrderCreateView(LoginRequiredMixin, View):
         book.count -= 1
         book.save(update_fields=["count"])
 
+        messages.success(request, f"You have successfully borrowed '{book.title}'.")
+
         return redirect("book:book_detail", pk=book.id)
 
 
@@ -92,5 +96,11 @@ class OrderCloseView(StaffRequiredMixin, View):
             book = Book.objects.get(pk=order.book_id)
             book.count += 1
             book.save(update_fields=["count"])
+
+            messages.success(
+                request, f"Order #{order.pk} for '{book.title}' was marked as returned."
+            )
+        else:
+            messages.info(request, f"Order #{order.pk} is already closed.")
 
         return redirect("order:order_list")

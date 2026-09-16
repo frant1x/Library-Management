@@ -19,6 +19,8 @@
   {% include "components/header.html" %}
 
   <main class="container flex-grow-1 py-4">
+    {% include "components/messages.html" %}
+
     {% block content %}
 
     {% endblock %}
@@ -29,7 +31,6 @@
     integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
     crossorigin="anonymous"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-
 </body>
 
 </html>

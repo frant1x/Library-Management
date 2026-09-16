@@ -3,7 +3,9 @@ from .models import Book
 from author.models import Author
 
 CUSTOM_WIDGETS = {
-    "title": forms.TextInput(attrs={"class": "form-control", "placeholder": "Title"}),
+    "title": forms.TextInput(
+        attrs={"class": "form-control form-control-sm", "placeholder": "Title..."}
+    ),
     "description": forms.Textarea(
         attrs={
             "class": "form-control",
@@ -11,24 +13,33 @@ CUSTOM_WIDGETS = {
             "rows": 3,
         }
     ),
-    "author": forms.Select(attrs={"class": "form-select"}),
+    "author": forms.Select(attrs={"class": "form-select form-select-sm"}),
     "count": forms.NumberInput(
         attrs={"class": "form-control", "placeholder": "Number of copies", "min": 0}
     ),
     "count_min": forms.NumberInput(
-        attrs={"class": "form-control", "placeholder": "Min", "min": 0}
+        attrs={"class": "form-control form-control-sm", "placeholder": "Min copies"}
     ),
     "count_max": forms.NumberInput(
-        attrs={"class": "form-control", "placeholder": "Max", "min": 0}
+        attrs={"class": "form-control form-control-sm", "placeholder": "Max copies"}
     ),
 }
 
 
 class BookForm(forms.ModelForm):
+    """Form for creating and updating Book instances."""
+
     class Meta:
         model = Book
         fields = ["title", "description", "author", "count"]
         widgets = {key: CUSTOM_WIDGETS[key] for key in fields}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field in self.fields.values():
+            field.col_class = "col-12"
+        self.fields["count"].col_class = "col-sm-6"
 
 
 class BookFilterForm(forms.Form):
@@ -47,3 +58,12 @@ class BookFilterForm(forms.Form):
     count_max = forms.IntegerField(
         required=False, min_value=0, widget=CUSTOM_WIDGETS["count_max"]
     )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.fields["title"].col_class = "col-md-3"
+        self.fields["author"].col_class = "col-md-3"
+        self.fields["count_min"].col_class = "col-md-2"
+        self.fields["count_max"].col_class = "col-md-2"
+        self.button_col_class = "col-md-2"

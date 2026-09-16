@@ -1,0 +1,103 @@
+<div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-secondary">
+  <div>
+    <h4 class="mb-1">User Information</h4>
+    <p class="text-secondary small mb-0">Update account details.</p>
+  </div>
+  {% if form.instance.is_staff %}
+  <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-3 py-2">Librarian</span>
+  {% else %}
+  <span class="badge bg-info-subtle text-info border border-info-subtle px-3 py-2">Visitor</span>
+  {% endif %}
+</div>
+
+<form method="post" x-data="{ submitting: false }" @submit="submitting = true">
+  {% csrf_token %}
+  {% if form.non_field_errors %}
+  <div class="alert alert-danger py-2 small mb-3">
+    {% for error in form.non_field_errors %}
+    <div>{{ error }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="row g-3 mb-3">
+    <div class="col-sm-6">
+      <label class="form-label">First name</label>
+      {{ form.first_name }}
+      <div class="text-danger small">{{ form.first_name.errors }}</div>
+    </div>
+
+    <div class="col-sm-6">
+      <label class="form-label">Last name</label>
+      {{ form.last_name }}
+      <div class="text-danger small">{{ form.last_name.errors }}</div>
+    </div>
+
+    <div class="col-12">
+      <label class="form-label">Email</label>
+      {{ form.email }}
+      <div class="text-danger small">{{ form.email.errors }}</div>
+    </div>
+
+  </div>
+
+  {% if form.new_password %}
+  <div class="row mb-3">
+    <div class="col-12">
+      <label class="form-label">Password</label>
+      {{ form.new_password }}
+    </div>
+  </div>
+
+  {% else %}
+  <div class="row g-3 mb-3">
+    <div class="col-sm-4">
+      <label class="form-label">Last login</label>
+      {{ form.last_login }}
+    </div>
+
+    <div class="col-sm-4">
+      <label class="form-label">Created at</label>
+      {{ form.created_at }}
+    </div>
+
+    <div class="col-sm-4">
+      <label class="form-label">Updated at</label>
+      {{ form.updated_at }}
+    </div>
+  </div>
+
+  <hr class="mb-3 border-secondary" />
+
+  <h5 class="mb-3 text-warning">Staff Permissions</h5>
+  <div class="d-flex flex-wrap gap-4">
+    <div class="form-check">
+      {{ form.is_active }}
+      <label class="form-check-label">Active</label>
+    </div>
+
+    <div class="form-check">
+      {{ form.is_staff }}
+      <label class="form-check-label">Staff</label>
+    </div>
+
+    <div class="form-check">
+      {{ form.is_superuser }}
+      <label class="form-check-label">Superuser</label>
+    </div>
+  </div>
+  {% endif %}
+
+  <hr class="my-4 border-secondary" />
+
+  <div class="d-flex justify-content-end">
+    <button type="submit" class="btn btn-primary px-4 py-2" :disabled="submitting">
+      <span x-show="!submitting">Update User</span>
+
+      <span x-show="submitting" x-cloak>
+        <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+        Updating...
+      </span>
+    </button>
+  </div>
+</form>

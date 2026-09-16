@@ -1,64 +1,25 @@
-{% extends "base.html" %}
+{% extends 'layouts/form_base.html' %}
 
 {% block title %}
 {% if form.instance.pk %}Edit Author{% else %}Add Author{% endif%} | Library
 {% endblock %}
 
-{% block content %}
-<div class="row justify-content-center py-4">
-    <div class="col-md-8 col-lg-6">
-        <div class="card bg-body-tertiary border-secondary border-opacity-25 rounded-4 shadow-sm p-4 p-md-5">
-            <div
-                class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-secondary border-opacity-25">
-                <div>
-                    <h3 class="mb-1">
-                        {% if form.instance.pk %}Edit Author{% else %}Add New Author{% endif %}
-                    </h3>
-                    <p class="text-secondary small mb-0">
-                        {% if form.instance.pk %}
-                        Update author credentials and country information.
-                        {% else %}
-                        Fill in the fields to register a new author.
-                        {% endif %}
-                    </p>
-                </div>
-            </div>
-            <form method="post" novalidate>
-                {% csrf_token %}
-                {% if form.non_field_errors %}
-                <div class="alert alert-danger rounded-3 py-2 small mb-3">
-                    {{ form.non_field_errors }}
-                </div>
-                {% endif %}
-                <div class="row g-3">
-                    {% for field in form %}
-                    <div class="{% if field.name in 'first_name,last_name' %}col-sm-6{% else %}col-12{% endif %}">
-                        <label for="{{ field.id_for_label }}" class="form-label fw-semibold">
-                            {{ field.label }}
-                        </label>
-                        {{ field }}
-                        {% if field.help_text %}
-                        <div class="form-text text-secondary small">{{ field.help_text }}</div>
-                        {% endif %}
-                        {% if field.errors %}
-                        <div class="text-danger small mt-1">
-                            {{ field.errors|striptags }}
-                        </div>
-                        {% endif %}
-                    </div>
-                    {% endfor %}
-                </div>
-                <hr class="my-4 border-secondary border-opacity-25" />
-                <div class="d-flex justify-content-end gap-2">
-                    <a href="{% url 'author:author_list' %}" class="btn btn-outline-secondary px-4">
-                        Cancel
-                    </a>
-                    <button type="submit" class="btn btn-primary px-4">
-                        {% if form.instance.pk %}Save Changes{% else %}Create Author{% endif %}
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+{% block form_title %}
+{% if form.instance.pk %}Edit Author{% else %}Add New Author{% endif %}
+{% endblock %}
+
+{% block form_subtitle %}
+{% if form.instance.pk %}
+Update author credentials and country information.
+{% else %}
+Fill in the fields to register a new author.
+{% endif %}
+{% endblock %}
+
+{% block cancel_button %}
+<a href="{% url 'author:author_list' %}" class="btn btn-outline-secondary px-4">Cancel</a>
+{% endblock %}
+
+{% block submit_text %}
+{% if form.instance.pk %}Save Changes{% else %}Create Author{% endif %}
 {% endblock %}

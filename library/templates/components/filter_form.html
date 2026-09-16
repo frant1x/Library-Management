@@ -1,0 +1,21 @@
+<div class="card bg-body-tertiary border-secondary border-opacity-25 rounded-4 shadow-sm p-3 mb-4">
+    <form method="get" class="row g-2 align-items-center">
+        {% for field in form %}
+        <div class="{{ field.field.col_class|default:'col-md-3' }}">
+            {{ field }}
+        </div>
+        {% endfor %}
+
+        <div class="{{ form.button_col_class|default:'col-md-2' }} d-flex gap-1">
+            <button type="submit" class="btn btn-sm btn-primary flex-grow-1">
+                Apply
+            </button>
+
+            {% if request.GET.urlencode %}
+            <a href="{{ request.path }}" class="btn btn-sm btn-outline-secondary" title="Reset filters">
+                <i class="bi bi-x-lg"></i>
+            </a>
+            {% endif %}
+        </div>
+    </form>
+</div>

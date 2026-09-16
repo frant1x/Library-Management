@@ -1,199 +1,23 @@
-{% extends "base.html" %}
+{% extends "layouts/list_base.html" %}
 
 {% block title %}Orders | Library{% endblock %}
 
-{% block content %}
-<div class="py-4 container">
+{% block page_title %}
+{% if request.user.is_staff %}Orders Registry{% else %}My Orders{% endif %}
+<span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill fs-6 align-middle ms-2">
+  {{ orders|length }} Record{{ orders|length|pluralize }}
+</span>
+{% endblock %}
+{% block page_subtitle %}
+{% if request.user.is_staff %}
+Monitor book circulation, filter reader records, and process returns.
+{% else %}
+Track your borrowed books and return deadlines.
+{% endif %}
+{% endblock %}
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="fw-bold mb-1">
-                {% if request.user.is_staff %}Orders Registry{% else %}My Orders{% endif %}
-            </h2>
-            <p class="text-secondary small mb-0">
-                {% if request.user.is_staff %}
-                Monitor book circulation, filter reader records, and process returns.
-                {% else %}
-                Track your borrowed books and return deadlines.
-                {% endif %}
-            </p>
-        </div>
-        <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill px-3 py-2">
-            {{ orders|length }} Record{{ orders|length|pluralize }}
-        </span>
-    </div>
+{% block list_content %}
+{% include "components/filter_form.html" with form=filter_form %}
 
-    <div class="card bg-body-tertiary border-secondary border-opacity-25 rounded-4 shadow-sm p-3 mb-4">
-        <form method="get" class="row g-2 align-items-center">
-            <div class="col-md-3">
-                <div class="input-group input-group-sm">
-                    <span class="input-group-text bg-body border-secondary border-opacity-25 text-secondary">
-                        <i class="bi bi-book"></i>
-                    </span>
-                    <input type="text" name="book" value="{{ request.GET.book|default:'' }}" class="form-control"
-                        placeholder="Book title..." />
-                </div>
-            </div>
-
-            {% if request.user.is_staff %}
-            <div class="col-md-3">
-                <select name="user" class="form-select form-select-sm">
-                    <option value="">All Readers</option>
-                    {% for user in users %}
-                    <option value="{{ user.id }}">
-                        {{ user }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-            {% endif %}
-
-            <div class="{% if request.user.is_staff %}col-md-2{% else %}col-md-4{% endif %}">
-                <select name="status" class="form-select form-select-sm">
-                    <option value="">All Statuses</option>
-                    <option value="active">Active / Borrowed</option>
-                    <option value="overdue">Overdue</option>
-                    <option value="returned">Returned</option>
-                </select>
-            </div>
-
-            <div class="{% if request.user.is_staff %}col-md-2{% else %}col-md-3{% endif %}">
-                <select name="sort" class="form-select form-select-sm">
-                    <option value="created_desc">
-                        Newest loans first
-                    </option>
-                    <option value="created_asc">Oldest loans
-                        first</option>
-                    <option value="due_asc">Deadline (Earliest)
-                    </option>
-                    <option value="due_desc">Deadline (Latest)
-                    </option>
-                    <option value="returned_desc">Recently returned</option>
-                </select>
-            </div>
-
-            <div class="{% if request.user.is_staff %}col-md-2{% else %}col-md-2{% endif %} d-flex gap-1">
-                <button type="submit" class="btn btn-sm btn-primary flex-grow-1">
-                    Apply
-                </button>
-                {% if request.GET.urlencode %}
-                <a href="{% url 'order:order_list' %}" class="btn btn-sm btn-outline-secondary" title="Reset filters">
-                    <i class="bi bi-x-lg"></i>
-                </a>
-                {% endif %}
-            </div>
-
-        </form>
-    </div>
-
-    <div class="card bg-body-tertiary border-secondary border-opacity-25 rounded-4 shadow-sm overflow-hidden">
-        {% if orders %}
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-body-secondary text-secondary small text-uppercase">
-                    <tr>
-                        <th scope="col" class="ps-4">Book</th>
-                        {% if request.user.is_staff %}
-                        <th scope="col">Reader</th>
-                        {% endif %}
-                        <th scope="col">Loan Date</th>
-                        <th scope="col">Target / Return Date</th>
-                        <th scope="col">Status</th>
-                        {% if request.user.is_staff %}
-                        <th scope="col" class="text-end pe-4">Actions</th>
-                        {% endif %}
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for order in orders %}
-                    <tr>
-                        <td class="ps-4">
-                            <div>
-                                <a href="{% url 'book:book_detail' order.book.id %}"
-                                    class="fw-semibold text-body text-decoration-none">
-                                    {{ order.book.title }}
-                                </a>
-                                <div class="text-secondary small">
-                                    {{ order.book.author.first_name }} {{ order.book.author.last_name }}
-                                </div>
-                            </div>
-                        </td>
-                        {% if request.user.is_staff %}
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center me-2 small fw-bold"
-                                    style="width: 32px; height: 32px;">
-                                    {{ order.user.first_name|first|default:"U" }}
-                                </div>
-                                <div>
-                                    <div class="small fw-semibold text-body">
-                                        {{ order.user.first_name }} {{ order.user.last_name }}
-                                    </div>
-                                    <div class="text-secondary" style="font-size: 0.75rem;">
-                                        {{ order.user.email }}
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                        {% endif %}
-                        <td class="small text-secondary">
-                            {{ order.created_at|date:"M d, Y"|default:"—" }}
-                        </td>
-                        <td class="small">
-                            {% if order.is_closed %}
-                            <span class="text-secondary">Returned: {{ order.end_at|date:"M d, Y" }}</span>
-                            {% else %}
-                            <span
-                                class="{% if order.is_overdue %}text-danger fw-semibold{% else %}text-body{% endif %}">
-                                Due: {{ order.planned_end_at|date:"M d, Y" }}
-                            </span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if order.is_closed %}
-                            <span
-                                class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1">
-                                <i class="bi bi-check-circle me-1"></i> Returned
-                            </span>
-                            {% elif order.is_overdue %}
-                            <span
-                                class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1">
-                                <i class="bi bi-exclamation-triangle me-1"></i> Overdue
-                            </span>
-                            {% else %}
-                            <span
-                                class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-1">
-                                <i class="bi bi-clock-history me-1"></i> Borrowed
-                            </span>
-                            {% endif %}
-                        </td>
-                        {% if request.user.is_staff %}
-                        <td class="text-end pe-4">
-                            {% if not order.is_closed %}
-                            <form action="{% url 'order:order_close' order.id %}" method="post" class="d-inline">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-sm btn-outline-success px-3"
-                                    onclick="return confirm('Confirm book return?');">
-                                    <i class="bi bi-box-arrow-in-down me-1"></i> Return
-                                </button>
-                            </form>
-                            {% else %}
-                            <span class="text-secondary small fst-italic">Completed</span>
-                            {% endif %}
-                        </td>
-                        {% endif %}
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <div class="text-center py-5 text-secondary">
-            <i class="bi bi-funnel fs-1 d-block mb-3 opacity-50"></i>
-            <h5>No matching orders found</h5>
-            <p class="small mb-0">Try adjusting or clearing your search filters.</p>
-        </div>
-        {% endif %}
-    </div>
-</div>
+{% include 'order/components/order_table.html' with show_reader=True %}
 {% endblock %}

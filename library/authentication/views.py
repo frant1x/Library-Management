@@ -1,6 +1,7 @@
 from django.shortcuts import redirect
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views.generic import CreateView, ListView, UpdateView
+from django.contrib import messages
 from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -24,6 +25,12 @@ class RegisterView(CreateView):
     def form_valid(self, form):
         self.object = form.save()
         login(self.request, self.object)
+
+        messages.success(
+            self.request,
+            f"Welcome, {self.object.first_name}! Your account has been created.",
+        )
+
         return redirect(self.get_success_url())
 
 
@@ -33,6 +40,13 @@ class CustomLoginView(LoginView):
     template_name = "authentication/log_in.html"
     form_class = LoginForm
     redirect_authenticated_user = True
+
+    def form_valid(self, form):
+        user = form.get_user()
+
+        messages.success(self.request, f"Welcome back, {user.first_name}!")
+
+        return super().form_valid(form)
 
 
 class UserListView(StaffRequiredMixin, ListView):
@@ -72,6 +86,8 @@ class UserProfileView(LoginRequiredMixin, ProfileOrdersMixin, UpdateView):
     def form_valid(self, form):
         response = super().form_valid(form)
         update_session_auth_hash(self.request, form.instance)
+
+        messages.success(self.request, "Your profile has been updated successfully.")
         return response
 
 
@@ -82,3 +98,11 @@ class UserUpdateView(StaffRequiredMixin, ProfileOrdersMixin, UpdateView):
     form_class = StaffUserForm
     template_name = "authentication/profile.html"
     success_url = reverse_lazy("authentication:show_user")
+
+    def get_success_url(self):
+        return reverse("authentication:show_user", kwargs={"pk": self.object.pk})
+
+    def form_valid(self, form):
+        messages.success(self.request, f"Profile was updated successfully.")
+
+        return super().form_valid(form)

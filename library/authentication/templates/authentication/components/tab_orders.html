@@ -1,0 +1,12 @@
+<div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-secondary">
+  <div>
+    <h4 class="mb-1">Order History</h4>
+    <p class="text-secondary small mb-0">Track active loans and past borrowed books.</p>
+  </div>
+
+  <span class="badge bg-secondary-subtle text-body border border-secondary-subtle px-3 py-2">
+    {{ orders|length }} Record{{ orders|length|pluralize }}
+  </span>
+</div>
+
+{% include 'order/components/order_table.html' %}
